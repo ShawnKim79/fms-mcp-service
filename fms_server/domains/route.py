@@ -1,11 +1,11 @@
 from pydantic import BaseModel
+from uuid import UUID
+from datetime import datetime
 
 class Route(BaseModel):
-    uuid: str
-    driver_name: str
-    driver_phone: str
-    departure: str
-    start_at: str
-    arrival: str
-    max_passenger: int
-    is_cancel: int
+    id: UUID
+    driver_id: UUID
+    car_plate_number: str
+    departure_location_name: str
+    departure_time: datetime
+    destination_location_name: str

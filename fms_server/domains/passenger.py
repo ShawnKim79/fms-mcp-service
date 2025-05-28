@@ -1,6 +1,7 @@
 from pydantic import BaseModel
+from uuid import UUID
 
 class Passenger(BaseModel):
-    uuid: str
+    id: UUID
     name: str
-    phone: str
+    contact_info: str
