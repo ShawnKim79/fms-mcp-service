@@ -4,10 +4,10 @@ from uuid import UUID
 from datetime import datetime
 from typing import Optional
 
-from domains.passenger import Passenger
-from domains.route import Route
-from domains.trip import trip as RideRequest
-from services.fms_service import FmsService
+from app.domains.passenger import Passenger
+from app.domains.route import Route
+from app.domains.trip import trip as RideRequest
+from app.services.fms_service import FmsService
 
 router = APIRouter(prefix="/fms")
 
