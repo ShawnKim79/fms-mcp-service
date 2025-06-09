@@ -1,4 +1,3 @@
-import os
 import psycopg2
 from uuid import UUID
 from datetime import datetime
@@ -7,32 +6,14 @@ from typing import Optional, List
 from app.domains.passenger import Passenger
 from app.domains.route import Route
 from app.domains.trip import trip as RideRequest
-
-DB_HOST = os.environ.get("DB_HOST", "localhost")
-DB_PORT = os.environ.get("DB_PORT", "5432")
-DB_USER = os.environ.get("DB_USER", "user")
-DB_PASSWORD = os.environ.get("DB_PASSWORD", "password")
-DB_NAME = os.environ.get("DB_NAME", "fms")
+from database import get_db_connection, close_db_connection
 
 class FmsService:
     def __init__(self):
-        self.conn = None
-        try:
-            self.conn = psycopg2.connect(
-                host=DB_HOST,
-                port=DB_PORT,
-                user=DB_USER,
-                password=DB_PASSWORD,
-                dbname=DB_NAME,
-            )
-            print("Connected to PostgreSQL")
-        except psycopg2.Error as e:
-            print(f"Error connecting to PostgreSQL: {e}")
+        self.conn = get_db_connection()
 
     def __del__(self):
-        if self.conn:
-            self.conn.close()
-            print("Disconnected from PostgreSQL")
+        close_db_connection(self.conn)
 
     def create_passenger(self, passenger: Passenger) -> Passenger:
         try:
