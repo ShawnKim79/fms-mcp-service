@@ -10,11 +10,8 @@ from app.models.model import PassengerDB, RouteDB, TripDB
 from database import get_db_session
 
 class FmsService:
-    def __init__(self):
-        self.session: Session = get_db_session()
-
-    def __del__(self):
-        self.session.close()
+    def __init__(self, session: Session):
+        self.session: Session = session
 
     def create_passenger(self, passenger: Passenger) -> Passenger:
         try:

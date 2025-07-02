@@ -6,8 +6,8 @@ from sqlalchemy.orm import sessionmaker, Session
 # 데이터베이스 연결 설정
 DB_HOST = os.environ.get("DB_HOST", "localhost")
 DB_PORT = os.environ.get("DB_PORT", "5432")
-DB_USER = os.environ.get("DB_USER", "user")
-DB_PASSWORD = os.environ.get("DB_PASSWORD", "password")
+DB_USER = os.environ.get("DB_USER", "fms_user")
+DB_PASSWORD = os.environ.get("DB_PASSWORD", "fms_password")
 DB_NAME = os.environ.get("DB_NAME", "fms")
 
 # 데이터베이스 URL 생성

@@ -3,7 +3,7 @@ from fastapi.responses import JSONResponse
 from uuid import UUID
 from datetime import datetime
 from typing import Optional
-from fms_server.database import get_db_session
+from database import get_db_session
 from sqlalchemy.orm import Session
 
 from app.domains.passenger import Passenger
