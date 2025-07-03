@@ -3,11 +3,10 @@ from uuid import UUID
 from datetime import datetime
 from typing import Optional, List
 
-from app.domains.passenger import Passenger
-from app.domains.route import Route
-from app.domains.trip import trip as RideRequest
-from app.models.model import PassengerDB, RouteDB, TripDB
-from database import get_db_session
+from domains.passenger import Passenger
+from domains.route import Route
+from domains.trip import Trip
+from models.model import PassengerDB, RouteDB, TripDB
 
 class FmsService:
     def __init__(self, session: Session):
@@ -136,30 +135,30 @@ class FmsService:
             print(f"Error deleting ride route: {e}")
             self.session.rollback()
 
-    def create_ride_request(self, ride_request: RideRequest) -> RideRequest:
+    def create_trip(self, trip: Trip) -> Trip:
         try:
             trip_db = TripDB(
-                id=ride_request.id,
-                ride_route_id=ride_request.ride_route_id,
-                passenger_id=ride_request.passenger_id,
-                pickup_request_location_name=ride_request.pickup_request_location_name,
-                pickup_time=ride_request.pickup_time,
-                is_approved=ride_request.is_approved
+                id=trip.id,
+                ride_route_id=trip.ride_route_id,
+                passenger_id=trip.passenger_id,
+                pickup_request_location_name=trip.pickup_request_location_name,
+                pickup_time=trip.pickup_time,
+                is_approved=trip.is_approved
             )
             self.session.add(trip_db)
             self.session.commit()
             self.session.refresh(trip_db)
-            return ride_request
+            return trip
         except Exception as e:
-            print(f"Error creating ride request: {e}")
+            print(f"Error creating trip: {e}")
             self.session.rollback()
             return None
 
-    def get_ride_request(self, request_id: UUID) -> Optional[RideRequest]:
+    def get_trip(self, request_id: UUID) -> Optional[Trip]:
         try:
             trip_db = self.session.query(TripDB).filter(TripDB.id == request_id).first()
             if trip_db:
-                return RideRequest(
+                return Trip(
                     id=trip_db.id,
                     ride_route_id=trip_db.ride_route_id,
                     passenger_id=trip_db.passenger_id,
@@ -169,15 +168,15 @@ class FmsService:
                 )
             return None
         except Exception as e:
-            print(f"Error getting ride request: {e}")
+            print(f"Error getting trip: {e}")
             return None
 
-    def find_ride_requests(
+    def find_trips(
         self,
         ride_route_id: Optional[UUID] = None,
         passenger_id: Optional[UUID] = None,
         is_approved: Optional[bool] = None,
-    ) -> List[RideRequest]:
+    ) -> List[Trip]:
         try:
             query = self.session.query(TripDB)
             
@@ -189,7 +188,7 @@ class FmsService:
                 query = query.filter(TripDB.is_approved == is_approved)
 
             trips_db = query.all()
-            return [RideRequest(
+            return [Trip(
                 id=trip.id,
                 ride_route_id=trip.ride_route_id,
                 passenger_id=trip.passenger_id,
@@ -198,10 +197,10 @@ class FmsService:
                 is_approved=trip.is_approved
             ) for trip in trips_db]
         except Exception as e:
-            print(f"Error finding ride requests: {e}")
+            print(f"Error finding trips: {e}")
             return []
 
-    def approve_ride_request(self, request_id: UUID) -> Optional[RideRequest]:
+    def approve_trip(self, request_id: UUID) -> Optional[Trip]:
         try:
             trip_db = self.session.query(TripDB).filter(TripDB.id == request_id).first()
             if trip_db:
@@ -209,7 +208,7 @@ class FmsService:
                 self.session.commit()
                 self.session.refresh(trip_db)
                 
-                return RideRequest(
+                return Trip(
                     id=trip_db.id,
                     ride_route_id=trip_db.ride_route_id,
                     passenger_id=trip_db.passenger_id,
@@ -219,6 +218,6 @@ class FmsService:
                 )
             return None
         except Exception as e:
-            print(f"Error approving ride request: {e}")
+            print(f"Error approving trip: {e}")
             self.session.rollback()
             return None
