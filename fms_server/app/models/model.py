@@ -17,13 +17,19 @@ class RouteDB(Base):
     __tablename__ = "route"
 
     id = Column(UUID, primary_key=True, index=True)
-    driver_id = Column(UUID)
-    car_plate_number = Column(String)
-    departure_location_name = Column(String)
-    departure_time = Column(DateTime)
-    destination_location_name = Column(String)
+    driver_id = Column(UUID, server_default=None, nullable=True)
+    car_plate_number = Column(String, server_default="", nullable=True)
+    departure_location_name = Column(String, server_default="", nullable=True)
+    departure_time = Column(DateTime, server_default="", nullable=True)
+    destination_location_name = Column(String, server_default="", nullable=True)
     created_at = Column(DateTime, default=datetime.now)
     updated_at = Column(DateTime, default=datetime.now, onupdate=datetime.now)
+
+    driver_name = Column(String, server_default="", nullable=True)
+    driver_contact_info = Column(String, server_default="", nullable=True)
+    passenger_name = Column(String, server_default="", nullable=True)
+    passenger_contact_info = Column(String, server_default="", nullable=True)
+    confirm_onboard = Column(Boolean, default=False)
 
 class TripDB(Base):
     __tablename__ = "trip"

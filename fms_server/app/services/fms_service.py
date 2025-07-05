@@ -4,7 +4,7 @@ from datetime import datetime
 from typing import Optional, List
 
 from domains.passenger import Passenger
-from domains.route import Route
+from domains.route import PassengerRoute, Route
 from domains.trip import Trip
 from models.model import PassengerDB, RouteDB, TripDB
 
@@ -66,7 +66,6 @@ class FmsService:
 
     def find_ride_routes(
         self,
-        driver_id: Optional[UUID] = None,
         start_time: Optional[datetime] = None,
         end_time: Optional[datetime] = None,
         departure_location_name: Optional[str] = None,
@@ -75,26 +74,17 @@ class FmsService:
         try:
             query = self.session.query(RouteDB)
             
-            if driver_id:
-                query = query.filter(RouteDB.driver_id == driver_id)
-            if start_time:
+            if start_time is not None:
                 query = query.filter(RouteDB.departure_time >= start_time)
-            if end_time:
+            if end_time is not None:
                 query = query.filter(RouteDB.departure_time <= end_time)
-            if departure_location_name:
+            if departure_location_name is not None:
                 query = query.filter(RouteDB.departure_location_name == departure_location_name)
-            if destination_location_name:
+            if destination_location_name is not None:
                 query = query.filter(RouteDB.destination_location_name == destination_location_name)
 
             routes_db = query.all()
-            return [Route(
-                id=route.id,
-                driver_id=route.driver_id,
-                car_plate_number=route.car_plate_number,
-                departure_location_name=route.departure_location_name,
-                departure_time=route.departure_time,
-                destination_location_name=route.destination_location_name
-            ) for route in routes_db]
+            return [Route.model_validate(route) for route in routes_db]
         except Exception as e:
             print(f"Error finding ride routes: {e}")
             return []
@@ -219,5 +209,56 @@ class FmsService:
             return None
         except Exception as e:
             print(f"Error approving trip: {e}")
+            self.session.rollback()
+            return None
+
+    def create_passenger_route(self, route: PassengerRoute) -> Route:
+        try:
+            route_db = RouteDB(
+                id=route.id,
+                departure_location_name=route.departure_location_name,
+                departure_time=route.departure_time,
+                destination_location_name=route.destination_location_name,
+                passenger_name=route.passenger_name,
+                passenger_contact_info=route.passenger_contact_info
+            )
+            self.session.add(route_db)
+            self.session.commit()
+            self.session.refresh(route_db)
+
+            passenger_route : Route = Route(
+                id=route_db.id,
+                departure_location_name=route_db.departure_location_name,
+                departure_time=route_db.departure_time,
+                destination_location_name=route_db.destination_location_name,
+                passenger_name=route_db.passenger_name,
+                passenger_contact_info=route_db.passenger_contact_info,
+                created_at=route_db.created_at,
+                updated_at=route_db.updated_at
+            )
+            return passenger_route
+        except Exception as e:
+            print(f"Error creating passenger route: {e}")
+            self.session.rollback()
+            return None
+        
+    def involve_driver_to_route(self, route_id: UUID, route: Route) -> Optional[Route]:
+        try:
+            route_db = self.session.query(RouteDB).filter(RouteDB.id == route_id).first()
+            if route_db is not None:
+                route_db.driver_id = route.driver_id
+                route_db.car_plate_number = route.car_plate_number
+                
+                route_db.driver_name = route.driver_name
+                route_db.driver_contact_info = route.driver_contact_info
+                route_db.confirm_onboard = route.confirm_onboard
+
+                self.session.commit()
+                self.session.refresh(route_db)
+                
+                return Route.model_validate(route_db)
+            return None
+        except Exception as e:
+            print(f"Error involving driver to route: {e}")
             self.session.rollback()
             return None
