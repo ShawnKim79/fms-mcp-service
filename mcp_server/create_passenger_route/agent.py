@@ -21,7 +21,7 @@ def create_passenger_route(departure_location_name: str, departure_time: str, de
     Returns:
         Dict[str, Any]: 생성된 경로 정보.
     """
-    endpoint = f"{BASE_URL}/fms/ride_route/passenger_route"
+    endpoint = f"{BASE_URL}/fms/ride_routes/passenger_route"
     payload = {
         "departure_location_name": departure_location_name,
         "departure_time": departure_time,
