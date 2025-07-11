@@ -6,6 +6,7 @@ from typing import Optional, List
 from domains.passenger import Passenger
 from domains.route import PassengerRoute, Route
 from domains.trip import Trip
+from controllers.dto.request_dto import RequestInvolveDriverToRoute
 from models.model import PassengerDB, RouteDB, TripDB
 
 class FmsService:
@@ -242,16 +243,15 @@ class FmsService:
             self.session.rollback()
             return None
         
-    def involve_driver_to_route(self, route_id: UUID, route: Route) -> Optional[Route]:
+    def involve_driver_to_route(self, route_id: UUID, route: RequestInvolveDriverToRoute) -> Optional[Route]:
         try:
             route_db = self.session.query(RouteDB).filter(RouteDB.id == route_id).first()
             if route_db is not None:
                 route_db.driver_id = route.driver_id
                 route_db.car_plate_number = route.car_plate_number
-                
                 route_db.driver_name = route.driver_name
                 route_db.driver_contact_info = route.driver_contact_info
-                route_db.confirm_onboard = route.confirm_onboard
+                route_db.confirm_onboard = True
 
                 self.session.commit()
                 self.session.refresh(route_db)

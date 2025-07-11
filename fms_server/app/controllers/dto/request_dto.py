@@ -47,7 +47,6 @@ class RequestInvolveDriverToRoute(BaseModel):
     car_plate_number: str
     driver_name: str
     driver_contact_info: str
-    confirm_onboard: bool
 
 
     model_config = ConfigDict(from_attributes=True)
