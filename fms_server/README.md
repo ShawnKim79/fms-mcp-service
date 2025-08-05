@@ -13,7 +13,9 @@ CREATE DATABASE fms OWNER fms_user;
 ```
 CREATE TABLE passenger (
     id UUID PRIMARY KEY,
+    password VARCHAR,
     name VARCHAR,
+    nickname VARCHAR,
     contact_info VARCHAR,
     created_at TIMESTAMP DEFAULT NOW(),
     updated_at TIMESTAMP DEFAULT NOW()
