@@ -19,12 +19,18 @@ router = APIRouter(prefix="/fms")
 def get_fms_service(db_session: Session = Depends(get_db_session)):
     return FmsService(session=db_session)
 
-@router.post("/passengers", response_model=Passenger, status_code=201)
+@router.post("/passengers",  status_code=201)
 async def create_passenger(request_passenger: RequestCreatePassenger, fms_service: FmsService = Depends(get_fms_service)):
+    print(request_passenger)
     passenger_data: Passenger = Passenger.model_validate(request_passenger)
-    passenger_data.id = uuid4()
 
     return fms_service.create_passenger(passenger_data)
+
+@router.get("/passengers/{passenger_id}", status_code=200)
+async def get_passenger(passeger_id:str, fms_service:FmsService = Depends(get_fms_service)):
+    passenger_data: Passenger = fms_service.find_passenger(passenger_id=passeger_id)
+    return passenger_data
+
 
 @router.get("/ride_routes", status_code=200)
 async def find_ride_routes(
@@ -55,3 +61,4 @@ async def involve_driver_to_route(route_id: UUID, request_involve_driver: Reques
     if not updated_route:
         raise HTTPException(status_code=404, detail="Route not found")
     return updated_route
+

@@ -2,11 +2,14 @@ from sqlalchemy.orm import Session
 from uuid import UUID
 from datetime import datetime
 from typing import Optional, List
+from uuid import UUID, uuid4
 
-from domains.passenger import Passenger
+from passlib.hash import pbkdf2_sha256
+
+from domains.passenger import Passenger, ResponsePassenger
 from domains.route import PassengerRoute, Route
 from domains.trip import Trip
-from controllers.dto.request_dto import RequestInvolveDriverToRoute
+from controllers.dto.request_dto import RequestCreatePassenger, RequestInvolveDriverToRoute
 from models.model import PassengerDB, RouteDB, TripDB
 
 class FmsService:
@@ -15,15 +18,20 @@ class FmsService:
 
     def create_passenger(self, passenger: Passenger) -> Passenger:
         try:
+            id = uuid4()
+            hashed_password = pbkdf2_sha256.hash(passenger.password)
             passenger_db = PassengerDB(
-                id=passenger.id,
-                name=passenger.name,
-                contact_info=passenger.contact_info
+                id = id,
+                password = hashed_password,
+                name = passenger.name,
+                nickname = passenger.nickname,
+                contact_info = passenger.contact_info
             )
+            print(passenger_db)
             self.session.add(passenger_db)
             self.session.commit()
             self.session.refresh(passenger_db)
-            return passenger
+            return ResponsePassenger.model_validate(passenger_db)
         except Exception as e:
             print(f"Error creating passenger: {e}")
             self.session.rollback()
@@ -260,5 +268,15 @@ class FmsService:
             return None
         except Exception as e:
             print(f"Error involving driver to route: {e}")
+            self.session.rollback()
+            return None
+    
+    def find_passenger(self, passenger_id: str):
+
+        try:
+            passenger_db:PassengerDB = self.session.query(PassengerDB).filter(PassengerDB.id == passenger_id).first()
+            return Passenger.model_validate(passenger_db)
+        except Exception as e:
+            print(f"Error create passenger:{e}")
             self.session.rollback()
             return None

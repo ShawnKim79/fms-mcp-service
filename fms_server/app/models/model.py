@@ -8,7 +8,9 @@ class PassengerDB(Base):
     __tablename__ = "passenger"
 
     id = Column(UUID, primary_key=True, index=True)
+    password = Column(String)
     name = Column(String)
+    nickname = Column(String)
     contact_info = Column(String)
     created_at = Column(DateTime, default=datetime.now)
     updated_at = Column(DateTime, default=datetime.now, onupdate=datetime.now)
