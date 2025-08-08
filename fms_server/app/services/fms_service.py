@@ -7,9 +7,9 @@ from uuid import UUID, uuid4
 from passlib.hash import pbkdf2_sha256
 
 from domains.passenger import Passenger, ResponsePassenger
-from domains.route import PassengerRoute, Route
+from domains.route import Route
 from domains.trip import Trip
-from controllers.dto.request_dto import RequestCreatePassenger, RequestInvolveDriverToRoute
+from controllers.dto.request_dto import RequestCreatePassenger
 from models.model import PassengerDB, RouteDB, TripDB
 
 class FmsService:
@@ -18,31 +18,28 @@ class FmsService:
 
     def create_passenger(self, passenger: Passenger) -> Passenger:
         try:
-            id = uuid4()
             hashed_password = pbkdf2_sha256.hash(passenger.password)
             passenger_db = PassengerDB(
-                id = id,
+                id = uuid4(),
                 password = hashed_password,
                 name = passenger.name,
                 nickname = passenger.nickname,
                 contact_info = passenger.contact_info
             )
-            print(passenger_db)
+            
             self.session.add(passenger_db)
             self.session.commit()
             self.session.refresh(passenger_db)
-            return ResponsePassenger.model_validate(passenger_db)
+            return Passenger.model_validate(passenger_db)
         except Exception as e:
             print(f"Error creating passenger: {e}")
             self.session.rollback()
             return None
 
-    def create_ride_route(self, route: Route) -> Route:
+    def create_route(self, route: Route) -> Route:
         try:
             route_db = RouteDB(
-                id=route.id,
-                driver_id=route.driver_id,
-                car_plate_number=route.car_plate_number,
+                id=uuid4(),
                 departure_location_name=route.departure_location_name,
                 departure_time=route.departure_time,
                 destination_location_name=route.destination_location_name
@@ -50,7 +47,8 @@ class FmsService:
             self.session.add(route_db)
             self.session.commit()
             self.session.refresh(route_db)
-            return route
+            
+            return Route.model_validate(route_db)
         except Exception as e:
             print(f"Error creating ride route: {e}")
             self.session.rollback()
@@ -221,55 +219,55 @@ class FmsService:
             self.session.rollback()
             return None
 
-    def create_passenger_route(self, route: PassengerRoute) -> Route:
-        try:
-            route_db = RouteDB(
-                id=route.id,
-                departure_location_name=route.departure_location_name,
-                departure_time=route.departure_time,
-                destination_location_name=route.destination_location_name,
-                passenger_name=route.passenger_name,
-                passenger_contact_info=route.passenger_contact_info
-            )
-            self.session.add(route_db)
-            self.session.commit()
-            self.session.refresh(route_db)
+    # def create_passenger_route(self, route: PassengerRoute) -> Route:
+    #     try:
+    #         route_db = RouteDB(
+    #             id=route.id,
+    #             departure_location_name=route.departure_location_name,
+    #             departure_time=route.departure_time,
+    #             destination_location_name=route.destination_location_name,
+    #             passenger_name=route.passenger_name,
+    #             passenger_contact_info=route.passenger_contact_info
+    #         )
+    #         self.session.add(route_db)
+    #         self.session.commit()
+    #         self.session.refresh(route_db)
 
-            passenger_route : Route = Route(
-                id=route_db.id,
-                departure_location_name=route_db.departure_location_name,
-                departure_time=route_db.departure_time,
-                destination_location_name=route_db.destination_location_name,
-                passenger_name=route_db.passenger_name,
-                passenger_contact_info=route_db.passenger_contact_info,
-                created_at=route_db.created_at,
-                updated_at=route_db.updated_at
-            )
-            return passenger_route
-        except Exception as e:
-            print(f"Error creating passenger route: {e}")
-            self.session.rollback()
-            return None
+    #         passenger_route : Route = Route(
+    #             id=route_db.id,
+    #             departure_location_name=route_db.departure_location_name,
+    #             departure_time=route_db.departure_time,
+    #             destination_location_name=route_db.destination_location_name,
+    #             passenger_name=route_db.passenger_name,
+    #             passenger_contact_info=route_db.passenger_contact_info,
+    #             created_at=route_db.created_at,
+    #             updated_at=route_db.updated_at
+    #         )
+    #         return passenger_route
+    #     except Exception as e:
+    #         print(f"Error creating passenger route: {e}")
+    #         self.session.rollback()
+    #         return None
         
-    def involve_driver_to_route(self, route_id: UUID, route: RequestInvolveDriverToRoute) -> Optional[Route]:
-        try:
-            route_db = self.session.query(RouteDB).filter(RouteDB.id == route_id).first()
-            if route_db is not None:
-                route_db.driver_id = route.driver_id
-                route_db.car_plate_number = route.car_plate_number
-                route_db.driver_name = route.driver_name
-                route_db.driver_contact_info = route.driver_contact_info
-                route_db.confirm_onboard = True
+    # def involve_driver_to_route(self, route_id: UUID, route: RequestInvolveDriverToRoute) -> Optional[Route]:
+    #     try:
+    #         route_db = self.session.query(RouteDB).filter(RouteDB.id == route_id).first()
+    #         if route_db is not None:
+    #             route_db.driver_id = route.driver_id
+    #             route_db.car_plate_number = route.car_plate_number
+    #             route_db.driver_name = route.driver_name
+    #             route_db.driver_contact_info = route.driver_contact_info
+    #             route_db.confirm_onboard = True
 
-                self.session.commit()
-                self.session.refresh(route_db)
+    #             self.session.commit()
+    #             self.session.refresh(route_db)
                 
-                return Route.model_validate(route_db)
-            return None
-        except Exception as e:
-            print(f"Error involving driver to route: {e}")
-            self.session.rollback()
-            return None
+    #             return Route.model_validate(route_db)
+    #         return None
+    #     except Exception as e:
+    #         print(f"Error involving driver to route: {e}")
+    #         self.session.rollback()
+    #         return None
     
     def find_passenger(self, passenger_id: str):
 

@@ -8,9 +8,9 @@ from sqlalchemy.orm import Session
 
 from config.database import get_db_session
 from domains.passenger import Passenger
-from domains.route import PassengerRoute, Route
+from domains.route import Route
 from domains.trip import Trip
-from controllers.dto.request_dto import RequestCreatePassenger, RequestRoute, RequestCreateTrip, RequestInvolveDriverToRoute, RequestCreatePassengerRoute
+from controllers.dto.request_dto import RequestCreateRoute, RequestCreateTrip
 from services.fms_service import FmsService
 
 
@@ -36,18 +36,12 @@ async def find_ride_routes(
     )
 
 
-@router.post("/passenger_route", response_model=Route, status_code=200)
-async def create_passenger_route(request_passenger_route: RequestCreatePassengerRoute, fms_service: FmsService = Depends(get_fms_service)):
-    route_data: PassengerRoute = PassengerRoute.model_validate(request_passenger_route)
-    route_data.id = uuid4()
-    return fms_service.create_passenger_route(route_data)
+@router.post("/", response_model=Route, status_code=200)
+async def create_route(request_route: RequestCreateRoute, fms_service: FmsService = Depends(get_fms_service)):
+    route_data: Route = Route.model_validate(request_route)
+    
+    return fms_service.create_route(route_data)
 
-
-@router.post("/driver_route", response_model=Route, status_code=200)
-async def create_passenger_route(request_passenger_route: RequestCreatePassengerRoute, fms_service: FmsService = Depends(get_fms_service)):
-    route_data: PassengerRoute = PassengerRoute.model_validate(request_passenger_route)
-    route_data.id = uuid4()
-    return fms_service.create_passenger_route(route_data)
 
 
 # @router.put("/{route_id}/involve_driver", response_model=Route, status_code=200)

@@ -27,12 +27,7 @@ class RouteDB(Base):
     created_at = Column(DateTime, default=datetime.now)
     updated_at = Column(DateTime, default=datetime.now, onupdate=datetime.now)
 
-    driver_name = Column(String, server_default="", nullable=True)
-    driver_contact_info = Column(String, server_default="", nullable=True)
-    passenger_name = Column(String, server_default="", nullable=True)
-    passenger_contact_info = Column(String, server_default="", nullable=True)
-    confirm_onboard = Column(Boolean, default=False)
-
+    
 class TripDB(Base):
     __tablename__ = "trip"
 

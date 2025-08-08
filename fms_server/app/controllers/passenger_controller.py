@@ -8,13 +8,13 @@ from sqlalchemy.orm import Session
 
 from config.database import get_db_session
 from domains.passenger import Passenger
-from domains.route import PassengerRoute, Route
+from domains.route import Route
 from domains.trip import Trip
-from controllers.dto.request_dto import RequestCreatePassenger, RequestRoute, RequestCreateTrip, RequestInvolveDriverToRoute, RequestCreatePassengerRoute
+from controllers.dto.request_dto import RequestCreatePassenger 
 from services.fms_service import FmsService
 
 
-router = APIRouter(prefix="/fms/user")
+router = APIRouter(prefix="/fms/passenger")
 
 def get_fms_service(db_session: Session = Depends(get_db_session)):
     return FmsService(session=db_session)
