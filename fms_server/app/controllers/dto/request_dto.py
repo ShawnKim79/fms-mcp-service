@@ -55,3 +55,7 @@ class RequestCreateTrip(BaseModel):
     pickup_time: datetime
 
     model_config = ConfigDict(from_attributes=True)
+
+class RequestToken(BaseModel):
+    nickname: str
+    password: str

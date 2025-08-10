@@ -21,7 +21,7 @@ def get_fms_service(db_session: Session = Depends(get_db_session)):
 
 @router.post("/",  status_code=201)
 async def create_passenger(request_passenger: RequestCreatePassenger, fms_service: FmsService = Depends(get_fms_service)):
-    print(request_passenger)
+    
     passenger_data: Passenger = Passenger.model_validate(request_passenger)
 
     return fms_service.create_passenger(passenger_data)
