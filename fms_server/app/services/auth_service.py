@@ -2,8 +2,9 @@ from datetime import datetime, timedelta
 from typing import Optional
 from jose import jwt
 from passlib.context import CryptContext
-from passlib.hash import bcrypt
+from passlib.hash import pbkdf2_sha256
 from sqlalchemy.orm import Session
+from models.model import PassengerDB
 
 from domains.passenger import Passenger
 
@@ -14,21 +15,18 @@ class AuthService:
 
     def __init__(self, session: Session):
         self.session = session
-        self.pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+        
 
     def verify_password(self, plain_password, hashed_password):
-        return self.pwd_context.verify(plain_password, hashed_password)
+        return pbkdf2_sha256.verify(plain_password, hashed_password)
 
-    def get_password_hash(self, password):
-        return self.pwd_context.hash(password)
-
-    def authenticate_user(self, nickname: str, password: str) -> Optional[Passenger]:
-        user = self.session.query(Passenger).filter(Passenger.nickname == nickname).first()
-        print(user)
+    def authenticate_user(self, nickname: str, password: str) -> Optional[PassengerDB]:
+        user = self.session.query(PassengerDB).filter(PassengerDB.nickname == nickname).first()
+        
         if not user:
             return None
         
-        if not self.verify_password(password, user.hashed_password):
+        if not self.verify_password(password, user.password):
             return None
         
         return user
