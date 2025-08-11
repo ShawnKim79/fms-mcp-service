@@ -40,3 +40,16 @@ class AuthService:
         to_encode.update({"exp": expire})
         encoded_jwt = jwt.encode(to_encode, self.SECRET_KEY, algorithm=self.ALGORITHM)
         return encoded_jwt
+
+    def decode_access_token(self, token: str):
+        try:
+            payload = jwt.decode(token, self.SECRET_KEY, algorithms=[self.ALGORITHM])
+            return payload
+        except jwt.JWTError:
+            return None
+        
+    def get_passenger_by_nickname(self, nickname: str):
+        passenger_db:PassengerDB = self.session.query(PassengerDB).filter(PassengerDB.nickname == nickname).first()
+        if passenger_db is None:
+            return None
+        return Passenger.model_validate(passenger_db)

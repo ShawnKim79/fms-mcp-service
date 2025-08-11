@@ -7,17 +7,23 @@ from pydantic import model_validator
 from sqlalchemy.orm import Session
 
 from config.database import get_db_session
-from domains.passenger import Passenger
+from domains.passenger import Passenger, ResponsePassenger
 from domains.route import Route
 from domains.trip import Trip
 from controllers.dto.request_dto import RequestCreatePassenger 
 from services.fms_service import FmsService
+from services.passenger_service import PassengerService
+from utils.security import get_current_user
 
 
 router = APIRouter(prefix="/fms/passenger")
 
 def get_fms_service(db_session: Session = Depends(get_db_session)):
     return FmsService(session=db_session)
+
+def get_passenger_service(db_session: Session = Depends(get_db_session)):
+    return PassengerService(session=db_session)
+
 
 @router.post("/",  status_code=201)
 async def create_passenger(request_passenger: RequestCreatePassenger, fms_service: FmsService = Depends(get_fms_service)):
@@ -26,8 +32,12 @@ async def create_passenger(request_passenger: RequestCreatePassenger, fms_servic
 
     return fms_service.create_passenger(passenger_data)
 
-@router.get("/{passenger_id}", status_code=200)
-async def get_passenger(passeger_id:str, fms_service:FmsService = Depends(get_fms_service)):
-    passenger_data: Passenger = fms_service.find_passenger(passenger_id=passeger_id)
-    return passenger_data
+@router.get("/my-info", status_code=200)
+async def get_passenger(passenger_service:PassengerService = Depends(get_passenger_service), current_user: Passenger = Depends(get_current_user)):
+    # passenger_data: Passenger = passenger_service.find_by_nickname(current_user.nickname)
+    if current_user is None:
+        raise HTTPException(status_code=404, detail="Passenger not found")
+    
+    
+    return ResponsePassenger.model_validate(current_user)
 
