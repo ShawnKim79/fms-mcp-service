@@ -12,6 +12,8 @@ from domains.route import Route
 from domains.trip import Trip
 from controllers.dto.request_dto import RequestCreateRoute, RequestCreateTrip
 from services.fms_service import FmsService
+from services.passenger_service import PassengerService
+from utils.security import get_token_payload
 
 
 router = APIRouter(prefix="/fms/routes")
@@ -22,11 +24,13 @@ def get_fms_service(db_session: Session = Depends(get_db_session)):
 
 @router.get("/", status_code=200)
 async def find_ride_routes(
+    payload: dict = Depends(get_token_payload),
     start_time: Optional[datetime] = Query(None),
     end_time: Optional[datetime] = Query(None),
     departure_location_name: Optional[str] = Query(None),
     destination_location_name: Optional[str] = Query(None),
-    fms_service: FmsService = Depends(get_fms_service)
+    fms_service: FmsService = Depends(get_fms_service),
+    
 ):
     return fms_service.find_ride_routes(
         start_time=start_time,
@@ -37,7 +41,10 @@ async def find_ride_routes(
 
 
 @router.post("/", response_model=Route, status_code=200)
-async def create_route(request_route: RequestCreateRoute, fms_service: FmsService = Depends(get_fms_service)):
+async def create_route(
+    request_route: RequestCreateRoute, 
+    fms_service: FmsService = Depends(get_fms_service), 
+    payload: dict = Depends(get_token_payload)):
     route_data: Route = Route.model_validate(request_route)
     
     return fms_service.create_route(route_data)

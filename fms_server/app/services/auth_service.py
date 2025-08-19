@@ -48,8 +48,4 @@ class AuthService:
         except jwt.JWTError:
             return None
         
-    def get_passenger_by_nickname(self, nickname: str):
-        passenger_db:PassengerDB = self.session.query(PassengerDB).filter(PassengerDB.nickname == nickname).first()
-        if passenger_db is None:
-            return None
-        return Passenger.model_validate(passenger_db)
+    
